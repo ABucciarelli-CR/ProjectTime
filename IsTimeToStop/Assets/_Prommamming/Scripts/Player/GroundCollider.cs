@@ -16,4 +16,9 @@ public class GroundCollider : MonoBehaviour
     {
         pa.landed = true;
     }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        pa.landed = false;
+    }
 }
