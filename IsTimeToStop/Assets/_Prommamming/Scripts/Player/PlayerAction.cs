@@ -4,18 +4,19 @@ using UnityEngine;
 
 public class PlayerAction : MonoBehaviour
 {
-    GameObject[] allObjects;
-
     [HideInInspector] public PlayerState playerState;
     [HideInInspector] public bool DoUpdateCoroutine = true;
     [HideInInspector] public GameObject playerStand;
     [HideInInspector] public GameObject playerCrouch;
+    private List<GameObject> objectCanTrigger = new List<GameObject>();
+    private GameObject gameManager;
 
     private float leftAndRightMovement;
     private float upNdownMovement;
     private bool zwKey = false;//ZA WARUDO!!!
     private bool timeIsStopped = false;
     private bool jump = false;
+    private bool interact = false;
 
     private float zwVelocity = 0.05f;
     private bool isJump = false;
@@ -36,73 +37,71 @@ public class PlayerAction : MonoBehaviour
 
     void Start ()
     {
+        gameManager = GameObject.Find("Game_Manager");
         rb2d = gameObject.GetComponent<Rigidbody2D>();
-        allObjects = GameObject.FindObjectsOfType<GameObject>();
         playerCrouch.SetActive(false);
-        //StartCoroutine(UpdateCoroutine());
     }
 
-    void /*IEnumerator*/ Update/*Coroutine*/()
+    void Update()
     {
-        //while (DoUpdateCoroutine)
-        //{
-            leftAndRightMovement = Input.GetAxisRaw("Horizontal");
-            upNdownMovement = Input.GetAxisRaw("Vertical");
-            jump = Input.GetButtonDown("Jump");
-            zwKey = Input.GetButtonDown("ZaWarudo");
+        leftAndRightMovement = Input.GetAxisRaw("Horizontal");
+        upNdownMovement = Input.GetAxisRaw("Vertical");
+        jump = Input.GetButtonDown("Jump");
+        zwKey = Input.GetButtonDown("ZaWarudo");
+        interact = Input.GetButtonDown("Interact");
 
-            switch (playerState)
-            {
-                case PlayerState.idle:
-                    Debug.Log("idle");
-                    Move();
-                    Crouch();
-                    Jump();
-                    ZWKey();
-                    break;
+        switch (playerState)
+        {
+            case PlayerState.idle:
+                //Debug.Log("idle");
+                Move();
+                Crouch();
+                Jump();
+                ZWKey();
+                Interact();
+                break;
 
-                case PlayerState.movement:
-                    Debug.Log("movement");
-                    Move();
-                    Crouch();
-                    Jump();
-                    ZWKey();
-                    break;
+            case PlayerState.movement:
+                //Debug.Log("movement");
+                Move();
+                Crouch();
+                Jump();
+                ZWKey();
+                Interact();
+                break;
 
-                case PlayerState.jumping:
-                    Debug.Log("jumping");
-                    Move();
-                    Stand();
-                    Jump();
-                    ZWKey();
-                    break;
+            case PlayerState.jumping:
+                //Debug.Log("jumping");
+                Move();
+                Stand();
+                Jump();
+                ZWKey();
+                Interact();
+                break;
 
-                default:
-                    break;
-            }
+            default:
+                break;
+        }
 
-            //switch states
-            if (landed && leftAndRightMovement == 0 && !jump)
-            {
-                playerState = PlayerState.idle;
-            }
-            else if (leftAndRightMovement != 0 && landed)
-            {
-                playerState = PlayerState.movement;
-            }
-            else if (!landed && jump)
-            {
-                isJump = true;
-                playerState = PlayerState.jumping;
-            }
-            else if(!landed && !jump)
-            {
-                playerState = PlayerState.jumping;
-            }
-
-            /******************************* COROUTINE END ********************************************************/
-            //yield return null;// new WaitForSecondsRealtime(Time.unscaledDeltaTime);
-        //}
+        //switch states
+        if (landed && leftAndRightMovement == 0 && !jump)
+        {
+            playerState = PlayerState.idle;
+        }
+        else if (leftAndRightMovement != 0 && landed)
+        {
+            playerState = PlayerState.movement;
+        }
+        else if (!landed && jump)
+        {
+            isJump = true;
+            playerState = PlayerState.jumping;
+        }
+        else if(!landed && !jump)
+        {
+            playerState = PlayerState.jumping;
+        }
+            
     }
 
     public void Move()
@@ -160,19 +159,27 @@ public class PlayerAction : MonoBehaviour
 
     public void ZWKey()
     {
+        
         if (zwKey && !timeIsStopped)
         {
             timeIsStopped = true;
-            /*foreach (GameObject go in allObjects)
-            {
-                if(!go.CompareTag("Player") && go.GetComponent<Rigidbody2D>() != null)
-                {
-                    go.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
-                }
-            }*/
-            Time.timeScale = zwVelocity;
-            Time.fixedDeltaTime = zwVelocity * 0.02f;
+            gameManager.GetComponent<GlobalValue>().timeIsStopped = true;
+           
             StartCoroutine(ZWWait(5));
+        }
+    }
+
+    public void Interact()
+    {
+        if(interact)
+        {
+            foreach(GameObject go in objectCanTrigger)
+            {
+                if(go.CompareTag("CanTrig"))
+                {
+                    go.GetComponent<InteractActive>().Interact();
+                }
+            }
         }
     }
 
@@ -199,17 +206,7 @@ public class PlayerAction : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(sec);
         timeIsStopped = false;
-        /*
-        foreach (GameObject go in allObjects)
-        {
-            if (!go.CompareTag("Player") && go.GetComponent<Rigidbody2D>() != null)
-            {
-                go.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.None;
-                go.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
-            }
-        }*/
-        Time.timeScale = 1;
-        Time.fixedDeltaTime = 0.02f;
+        gameManager.GetComponent<GlobalValue>().timeIsStopped = false;
     }
 
     float FallingCalculation(float jf)
@@ -224,5 +221,15 @@ public class PlayerAction : MonoBehaviour
             jf -= Physics.gravity.magnitude;
         }
         return jf;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        objectCanTrigger.Add(collision.gameObject);
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        objectCanTrigger.Remove(collision.gameObject);
     }
 }
