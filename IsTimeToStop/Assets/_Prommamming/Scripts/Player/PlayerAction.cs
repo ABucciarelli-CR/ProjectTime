@@ -20,11 +20,11 @@ public class PlayerAction : MonoBehaviour
 
     private float zwVelocity = 0.05f;
     private bool isJump = false;
-    [HideInInspector] public bool landed = true;
+    /*[HideInInspector]*/ public bool landed = true;
+    [HideInInspector] Vector2 vel = new Vector2(0,0);
 
     public float movementSpeed = 1f;
     public float jumpForce = 1f;
-
 
     Rigidbody2D rb2d;
 
@@ -83,6 +83,18 @@ public class PlayerAction : MonoBehaviour
                 break;
         }
 
+
+        if (landed)
+        {
+            vel = new Vector2(vel.x, 0);
+        }
+        if(leftAndRightMovement == 0)
+        {
+            vel = new Vector2(0, vel.y);
+        }
+
+        rb2d.MovePosition(rb2d.position + vel * Time.deltaTime);
+
         //switch states
         if (landed && leftAndRightMovement == 0 && !jump)
         {
@@ -108,9 +120,8 @@ public class PlayerAction : MonoBehaviour
     {
         if(leftAndRightMovement != 0)
         {
-            //rb2d.transform.Translate(new Vector3(rb2d.transform.position.x +(leftAndRightMovement * movementSpeed), rb2d.transform.position.y, rb2d.transform.position.z));
-            gameObject.transform.Translate(Vector3.right * (leftAndRightMovement * movementSpeed));
-            //rb2d.velocity = new Vector2(leftAndRightMovement * movementSpeed, rb2d.velocity.y);
+            Debug.Log("Move");
+            vel = new Vector2(leftAndRightMovement * movementSpeed, vel.y);
         }
     }
 
@@ -141,17 +152,14 @@ public class PlayerAction : MonoBehaviour
         if (jump && landed)
         {
             landed = false;
-
-            Vector3 playerPos = transform.position;
+            
             float jf = jumpForce;
 
             StartCoroutine(FallWithJumpCalculation(jf));
-            //rb2d.velocity = new Vector2(rb2d.velocity.x, jumpForce);
         }
         if (!jump && !landed && !isJump)
         {
-            Vector3 playerPos = transform.position;
-            float jf = 0f;
+            float jf = -jumpForce;
 
             StartCoroutine(FallWithoutJumpCalculation(jf));
         }
@@ -211,7 +219,8 @@ public class PlayerAction : MonoBehaviour
 
     float FallingCalculation(float jf)
     {
-        gameObject.transform.Translate(Vector3.up * (jf * Time.unscaledDeltaTime));
+        vel = new Vector2(vel.x, jf);
+        
         if(Mathf.Abs(jf - Physics.gravity.magnitude) >= jumpForce)
         {
             jf = -jumpForce;

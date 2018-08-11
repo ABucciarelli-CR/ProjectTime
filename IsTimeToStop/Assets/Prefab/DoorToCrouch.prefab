@@ -23,7 +23,7 @@ GameObject:
   - component: {fileID: 61126991898883932}
   m_Layer: 0
   m_Name: BackWall
-  m_TagString: Untagged
+  m_TagString: terrain
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -39,7 +39,7 @@ GameObject:
   - component: {fileID: 212705007015888308}
   m_Layer: 0
   m_Name: DoorToCrouch
-  m_TagString: Untagged
+  m_TagString: terrain
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -64,7 +64,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1949811227699552}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 25031.9, y: 6859.15, z: 0}
+  m_LocalPosition: {x: 25035.992, y: 6859.571, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4637589907144144}

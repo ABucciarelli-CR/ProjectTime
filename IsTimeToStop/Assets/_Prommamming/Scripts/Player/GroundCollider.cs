@@ -10,15 +10,22 @@ public class GroundCollider : MonoBehaviour
     private void Awake()
     {
         pa = player.GetComponent<PlayerAction>();
+        pa.landed = false;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        pa.landed = true;
+        if(collision.CompareTag("terrain"))
+        {
+            pa.landed = true;
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        pa.landed = false;
+        if (collision.CompareTag("terrain"))
+        {
+            pa.landed = false;
+        }
     }
 }
