@@ -34,12 +34,15 @@ public class SecurityCam : MonoBehaviour
 
     private void Update()
     {
-        Rotation();
+        if(!gameManager.GetComponent<GlobalValue>().timeIsStopped)
+        {
+            Rotation();
+        }
     }
 
     public void Rotation()
     {
-        float time = Mathf.PingPong(Time.time * rotationVelocity, 1);
+        float time = Mathf.PingPong((Time.time - gameManager.GetComponent<GlobalValue>().timeLost) * rotationVelocity, 1);
         gameObject.transform.eulerAngles = Vector3.Lerp(pointA, pointB, time);
     }
 

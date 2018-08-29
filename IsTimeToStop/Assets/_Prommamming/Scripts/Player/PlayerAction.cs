@@ -8,8 +8,11 @@ public class PlayerAction : MonoBehaviour
     [HideInInspector] public bool DoUpdateCoroutine = true;
     [HideInInspector] public GameObject playerStand;
     [HideInInspector] public GameObject playerCrouch;
+    [HideInInspector] public GameObject nGrabbingParent;
+    /*[HideInInspector]*/ public List<GameObject> nearGameobjectCanGrab = new List<GameObject>();
     private List<GameObject> objectCanTrigger = new List<GameObject>();
     private GameObject gameManager;
+    private GameObject goMin;
 
     private float leftAndRightMovement;
     private float upNdownMovement;
@@ -17,6 +20,7 @@ public class PlayerAction : MonoBehaviour
     private bool timeIsStopped = false;
     private bool jump = false;
     private bool interact = false;
+    private bool grabObject = false;
 
     private float zwVelocity = 0.05f;
     private bool isJump = false;
@@ -49,6 +53,7 @@ public class PlayerAction : MonoBehaviour
         jump = Input.GetButtonDown("Jump");
         zwKey = Input.GetButtonDown("ZaWarudo");
         interact = Input.GetButtonDown("Interact");
+        grabObject = Input.GetButtonDown("GrabObject");
 
         switch (playerState)
         {
@@ -59,6 +64,7 @@ public class PlayerAction : MonoBehaviour
                 Jump();
                 ZWKey();
                 Interact();
+                GrabObject();
                 break;
 
             case PlayerState.movement:
@@ -68,6 +74,7 @@ public class PlayerAction : MonoBehaviour
                 Jump();
                 ZWKey();
                 Interact();
+                GrabObject();
                 break;
 
             case PlayerState.jumping:
@@ -88,6 +95,7 @@ public class PlayerAction : MonoBehaviour
         {
             vel = new Vector2(vel.x, 0);
         }
+
         if(leftAndRightMovement == 0)
         {
             vel = new Vector2(0, vel.y);
@@ -152,15 +160,17 @@ public class PlayerAction : MonoBehaviour
         if (jump && landed)
         {
             landed = false;
-            
+
             float jf = jumpForce;
+
+            //rb2d.AddForce(new Vector3(0, jumpForce, 0), ForceMode2D.Force);
 
             StartCoroutine(FallWithJumpCalculation(jf));
         }
         if (!jump && !landed && !isJump)
         {
             float jf = -jumpForce;
-
+            
             StartCoroutine(FallWithoutJumpCalculation(jf));
         }
     }
@@ -188,6 +198,33 @@ public class PlayerAction : MonoBehaviour
                     go.GetComponent<InteractActive>().Interact();
                 }
             }
+        }
+    }
+
+    public void GrabObject()
+    {
+        //get the near enemy
+
+        if (grabObject && nGrabbingParent.transform.childCount == 0)
+        { 
+            float minDist = Mathf.Infinity;
+            foreach(GameObject go in nearGameobjectCanGrab)
+            {
+                float dist = Vector3.Distance(go.transform.position, transform.position);
+                if(dist < minDist)
+                {
+                    goMin = go;
+                    minDist = dist;
+                }
+            }
+
+            goMin.GetComponent<Rigidbody2D>().isKinematic = true;
+            goMin.transform.parent = nGrabbingParent.transform;
+        }
+        else if(grabObject && nGrabbingParent.transform.childCount != 0)
+        {
+            goMin.GetComponent<Rigidbody2D>().isKinematic = false;
+            goMin.transform.parent = null;
         }
     }
 
