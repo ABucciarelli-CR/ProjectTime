@@ -5,51 +5,57 @@ using UnityEngine;
 public class StopObject : MonoBehaviour
 {
     private GameObject gameManager;
+    private GameObject player;
 
     private Vector2 myVelocity;
     private bool isLock = false;
     
 	void Start ()
     {
+        player = GameObject.Find("Player");
+        player.GetComponent<PlayerAction>().ZaWarudo += LockMyself;
+        player.GetComponent<PlayerAction>().StopZaWarudo += UnlockMyself;
         gameManager = GameObject.Find("Game_Manager");
     }
-	
-	void Update ()
+
+    private void OnDestroy()
     {
-		if(gameManager.GetComponent<GlobalValue>().timeIsStopped)
+        if(player != null)
         {
-            if(!isLock)
-            {
-                LockMyself();
-            }
+            player.GetComponent<PlayerAction>().ZaWarudo -= LockMyself;
+            player.GetComponent<PlayerAction>().StopZaWarudo -= UnlockMyself;
         }
-        else
-        {
-            if(isLock)
-            {
-                UnlockMyself();
-            }
-        }
+    }
+
+    void Update ()
+    {
+		
 	}
 
     public void LockMyself()
     {
-        isLock = true;
-        if (gameObject.GetComponent<Rigidbody2D>())
+        if (!isLock)
         {
-            myVelocity = gameObject.GetComponent<Rigidbody2D>().velocity;
-            gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
+            isLock = true;
+            if (gameObject.GetComponent<Rigidbody2D>())
+            {
+                myVelocity = gameObject.GetComponent<Rigidbody2D>().velocity;
+                gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
+            }
         }
     }
 
     public void UnlockMyself()
     {
-        isLock = false;
-        if (gameObject.GetComponent<Rigidbody2D>())
+        if (isLock)
         {
-            gameObject.GetComponent<Rigidbody2D>().velocity = myVelocity;
-            gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.None;
-            gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
+            isLock = false;
+            if (gameObject.GetComponent<Rigidbody2D>())
+            {
+                gameObject.GetComponent<Rigidbody2D>().velocity = myVelocity;
+                gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.None;
+                gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
+            }
         }
     }
 }

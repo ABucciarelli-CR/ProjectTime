@@ -1,9 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class PlayerAction : MonoBehaviour
 {
+    public event Action ZaWarudo;
+    public event Action StopZaWarudo;
+
     [HideInInspector] public PlayerState playerState;
     [HideInInspector] public bool DoUpdateCoroutine = true;
     [HideInInspector] public GameObject playerStand;
@@ -128,9 +132,13 @@ public class PlayerAction : MonoBehaviour
     {
         if(leftAndRightMovement != 0)
         {
-            Debug.Log("Move");
             vel = new Vector2(leftAndRightMovement * movementSpeed, vel.y);
         }
+        /*
+        if(leftAndRightMovement < 0)
+        {
+            
+        }*/
     }
 
     public void Crouch()
@@ -182,7 +190,7 @@ public class PlayerAction : MonoBehaviour
         {
             timeIsStopped = true;
             gameManager.GetComponent<GlobalValue>().timeIsStopped = true;
-           
+            LockTime();
             StartCoroutine(ZWWait(5));
         }
     }
@@ -208,18 +216,20 @@ public class PlayerAction : MonoBehaviour
         if (grabObject && nGrabbingParent.transform.childCount == 0)
         { 
             float minDist = Mathf.Infinity;
-            foreach(GameObject go in nearGameobjectCanGrab)
+            if(nearGameobjectCanGrab.Count != 0)
             {
-                float dist = Vector3.Distance(go.transform.position, transform.position);
-                if(dist < minDist)
+                foreach (GameObject go in nearGameobjectCanGrab)
                 {
-                    goMin = go;
-                    minDist = dist;
+                    float dist = Vector3.Distance(go.transform.position, transform.position);
+                    if (dist < minDist)
+                    {
+                        goMin = go;
+                        minDist = dist;
+                    }
                 }
+                goMin.GetComponent<Rigidbody2D>().isKinematic = true;
+                goMin.transform.parent = nGrabbingParent.transform;
             }
-
-            goMin.GetComponent<Rigidbody2D>().isKinematic = true;
-            goMin.transform.parent = nGrabbingParent.transform;
         }
         else if(grabObject && nGrabbingParent.transform.childCount != 0)
         {
@@ -251,6 +261,7 @@ public class PlayerAction : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(sec);
         timeIsStopped = false;
+        UnlockTime();
         gameManager.GetComponent<GlobalValue>().timeIsStopped = false;
     }
 
@@ -267,6 +278,22 @@ public class PlayerAction : MonoBehaviour
             jf -= Physics.gravity.magnitude;
         }
         return jf;
+    }
+
+    public void LockTime()
+    {
+        if(ZaWarudo != null)
+        {
+            ZaWarudo();
+        }
+    }
+
+    public void UnlockTime()
+    {
+        if (StopZaWarudo != null)
+        {
+            StopZaWarudo();
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
