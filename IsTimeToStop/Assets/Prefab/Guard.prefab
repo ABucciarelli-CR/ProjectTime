@@ -40,7 +40,7 @@ GameObject:
   - component: {fileID: 61168247802332220}
   - component: {fileID: 212839485189883304}
   - component: {fileID: 114120093430830754}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Guard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -54,7 +54,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1562661761551990}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 25071.55, y: 6860.1, z: -288.85156}
+  m_LocalPosition: {x: 25056.09, y: 6860.991, z: -288.85156}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4717045178205828}
@@ -108,7 +108,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 5
+  m_Radius: 4
 --- !u!61 &61168247802332220
 BoxCollider2D:
   m_ObjectHideFlags: 1
@@ -145,6 +145,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3cce10094b0eb294c84c205afea744a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  visionArea: {fileID: 1024581396122246}
   redX: {fileID: 21300000, guid: 4c5e12a8d82daa54490ed02230ccdb87, type: 3}
   movDistance: 25
   movVelocity: 0.1
