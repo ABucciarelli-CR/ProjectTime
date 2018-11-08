@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.UI;
 
 public class PlayerAction : MonoBehaviour
 {
@@ -13,7 +14,10 @@ public class PlayerAction : MonoBehaviour
     [HideInInspector] public GameObject playerStand;
     [HideInInspector] public GameObject playerCrouch;
     [HideInInspector] public GameObject nGrabbingParent;
-    /*[HideInInspector]*/ public List<GameObject> nearGameobjectCanGrab = new List<GameObject>();
+    [HideInInspector] public List<GameObject> nearGameobjectCanGrab = new List<GameObject>();
+    [HideInInspector] public Slider timeStopSlider;
+    [HideInInspector] public Slider countdownTimeStopSlider;
+
     private List<GameObject> objectCanTrigger = new List<GameObject>();
     private GameObject gameManager;
     private GameObject goMin;
@@ -21,10 +25,12 @@ public class PlayerAction : MonoBehaviour
     private float leftAndRightMovement;
     private float upNdownMovement;
     private bool zwKey = false;//ZA WARUDO!!!
+    private bool canStop = true;
     private bool timeIsStopped = false;
     private bool jump = false;
     private bool interact = false;
     private bool grabObject = false;
+    private bool startCountdown = false;
 
     private float zwVelocity = 0.05f;
     private bool isJump = false;
@@ -33,6 +39,8 @@ public class PlayerAction : MonoBehaviour
 
     public float movementSpeed = 1f;
     public float jumpForce = 1f;
+    public float secondTimeStop = 5f;
+    public float countdownTimeStop = 1f;
 
     Rigidbody2D rb2d;
 
@@ -48,6 +56,10 @@ public class PlayerAction : MonoBehaviour
         gameManager = GameObject.Find("Game_Manager");
         rb2d = gameObject.GetComponent<Rigidbody2D>();
         playerCrouch.SetActive(false);
+        timeStopSlider.maxValue = secondTimeStop;
+        timeStopSlider.value = secondTimeStop;
+        countdownTimeStopSlider.maxValue = countdownTimeStop;
+        countdownTimeStopSlider.value = countdownTimeStop;
     }
 
     void Update()
@@ -58,6 +70,21 @@ public class PlayerAction : MonoBehaviour
         zwKey = Input.GetButtonDown("ZaWarudo");
         interact = Input.GetButtonDown("Interact");
         grabObject = Input.GetButtonDown("GrabObject");
+
+        if(timeIsStopped)
+        {
+            timeStopSlider.value += Time.deltaTime;
+        }
+
+        if(startCountdown)
+        {
+            countdownTimeStopSlider.value += Time.deltaTime;
+            if(countdownTimeStopSlider.value >= countdownTimeStop)
+            {
+                canStop = true;
+                startCountdown = false;
+            }
+        }
 
         switch (playerState)
         {
@@ -93,8 +120,7 @@ public class PlayerAction : MonoBehaviour
             default:
                 break;
         }
-
-
+        
         if (landed)
         {
             vel = new Vector2(vel.x, 0);
@@ -186,12 +212,12 @@ public class PlayerAction : MonoBehaviour
     public void ZWKey()
     {
         
-        if (zwKey && !timeIsStopped)
+        if (zwKey && !timeIsStopped && canStop)
         {
             timeIsStopped = true;
             gameManager.GetComponent<GlobalValue>().timeIsStopped = true;
             LockTime();
-            StartCoroutine(ZWWait(5));
+            StartCoroutine(ZWWait(secondTimeStop));
         }
     }
 
@@ -282,8 +308,10 @@ public class PlayerAction : MonoBehaviour
 
     public void LockTime()
     {
-        if(ZaWarudo != null)
+        timeStopSlider.value = 0;
+        if (ZaWarudo != null)
         {
+            canStop = false;
             ZaWarudo();
         }
     }
@@ -292,6 +320,8 @@ public class PlayerAction : MonoBehaviour
     {
         if (StopZaWarudo != null)
         {
+            countdownTimeStopSlider.value = 0;
+            startCountdown = true;
             StopZaWarudo();
         }
     }
